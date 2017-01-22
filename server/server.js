@@ -21,7 +21,16 @@ app.post("/notes", (req, res) => {
     });
 });
 
-// GET /todos/123
+// GET /notes
+app.get("/notes", (req, res) => {
+    Note.find().then((notes) => {
+        res.send({notes});
+    }, (e) => {
+        res.status(400).send(e);
+    });
+});
+
+// GET /notes/123
 
 app.listen(3000, () => {
     console.log("Started on port 3000");
