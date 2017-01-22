@@ -4,8 +4,18 @@ const request = require("supertest");
 var {app} = require("./../server");
 var {Note} = require("./../models/note");
 
+const notes = [
+    {
+        text: "First text todo"
+    }, {
+        text: "Second text todo"
+    }
+];
+
 beforeEach((done) => {
-    Note.remove({}).then(() => done());
+    Note.remove({}).then(() => {
+        Note.insertMany(notes);
+    }).then(() => done());
 });
 
 describe("POST /Notes", () => {
@@ -24,7 +34,7 @@ describe("POST /Notes", () => {
                     return done(err);
                 }
 
-                Note.find().then((notes) => {
+                Note.find({text}).then((notes) => {
                     expect(notes.length).toBe(1);
                     expect(notes[0].text).toBe(text);
                     done();
@@ -43,9 +53,21 @@ describe("POST /Notes", () => {
                 }
 
                 Note.find().then((notes) => {
-                    expect(notes.length).toBe(0);
+                    expect(notes.length).toBe(2);
                     done();
                 }).catch((e) => done(e));
             });
     });
 });
+
+describe("GET /notes", () => {
+    it("Should get all notes", (done) => {
+        request(app)
+            .get("/notes")
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.notes.length).toBe(2);
+            })
+            .end(done);
+    });
+})
