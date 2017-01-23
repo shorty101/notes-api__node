@@ -1,13 +1,16 @@
 const expect = require("expect");
 const request = require("supertest");
+const {ObjectId} = require("mongodb");
 
 var {app} = require("./../server");
 var {Note} = require("./../models/note");
 
 const notes = [
     {
+        _id: new ObjectId(),
         text: "First text todo"
     }, {
+        _id: new ObjectId(),
         text: "Second text todo"
     }
 ];
@@ -70,4 +73,29 @@ describe("GET /notes", () => {
             })
             .end(done);
     });
-})
+});
+
+describe("GET /notes/:id", () => {
+    it("Should get a note by Id", (done) => {
+        request(app)
+            .get(`/notes/${notes[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.note.text).toBe(notes[0].text);
+            })
+            .end(done);
+    });
+
+    it("Should return a 404 if note not found", (done) => {
+        request(app)
+            .get(`/notes/${new ObjectId().toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+    it("Should return a 404 if bad ObjectId sent", (done) => {
+        request(app)
+            .get("/notes/123")
+            .expect(404)
+            .end(done);
+    });
+});
