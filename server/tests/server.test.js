@@ -99,3 +99,39 @@ describe("GET /notes/:id", () => {
             .end(done);
     });
 });
+
+describe("DELETE /notes/:id", () => {
+    it("Should remove a note", (done) => {
+        var hexId = notes[1]._id.toHexString();
+
+        request(app)
+            .delete(`/notes/${hexId}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.note._id).toBe(hexId);
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err);
+                }
+                Note.findById(hexId).then((note) => {
+                    expect(note).toNotExist();
+                    return done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it("Should return a 404 if no note is deleted", (done) => {
+        request(app)
+            .delete(`/notes/${new ObjectId().toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it("Should return a 404 if ObjectId is invalid", (done) => {
+        request(app)
+            .delete(`/notes/1234`)
+            .expect(404)
+            .end(done);
+    });
+});
