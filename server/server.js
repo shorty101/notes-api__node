@@ -1,5 +1,6 @@
-var express = require("express");
-var bodyParser = require("body-parser");
+const _ = require("lodash");
+const express = require("express");
+const bodyParser = require("body-parser");
 const {ObjectId} = require("mongodb");
 
 var {mongoose} = require("./db/mongoose");
@@ -59,6 +60,31 @@ app.delete("/notes/:id", (req, res) => {
         }
         res.status(200).send({note});
     }, (e) => {
+        res.status(400).send(e);
+    });
+});
+
+app.patch("/notes/:id", (req, res) => {
+    var id = req.params.id;
+    var body = _.pick(req.body, ["text", "completed"]);
+
+    if (!ObjectId.isValid(id)) {
+        return res.status(404).send();
+    }
+
+    if (_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Note.findByIdAndUpdate(id, {$set: body}, {new: true}).then((note) => {
+        if (!note) {
+            return res.status(404).send();
+        }
+        res.send({note});
+    }).catch((e) => {
         res.status(400).send(e);
     });
 });
