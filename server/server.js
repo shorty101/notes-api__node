@@ -7,6 +7,7 @@ var {User} = require("./models/user");
 var {Note} = require("./models/note");
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -47,29 +48,8 @@ app.get("/notes/:id", (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log("Started on port 3000");
+app.listen(port, () => {
+    console.log(`Started on port ${port}`);
 });
 
 module.exports = {app};
-
-// var newUser = new User({
-//     email: "test@testmail.com"
-// });
-
-// newUser.save().then((doc) => {
-//     console.log("Saved user", doc);
-// }, (e) => {
-//     console.log("Unable to save user", e);
-// });
-
-// var newNote = new Note({
-//     text: "Cook Dinner",
-//     completed: false
-// });
-
-// newNote.save().then((doc) => {
-//     console.log("Saved note", doc);
-// }, (e) => {
-//     console.log("Unable to save note", e);
-// });
