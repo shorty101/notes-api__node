@@ -11,7 +11,9 @@ const notes = [
         text: "First text todo"
     }, {
         _id: new ObjectId(),
-        text: "Second text todo"
+        text: "Second text todo",
+        completed: true,
+        completedAt: 333
     }
 ];
 
@@ -132,6 +134,49 @@ describe("DELETE /notes/:id", () => {
         request(app)
             .delete(`/notes/1234`)
             .expect(404)
+            .end(done);
+    });
+});
+
+describe("PATCH /notes/:id", () => {
+    it("Should patch a note", (done) => {
+        var hexId = notes[0]._id;
+        var body = {
+            text: "Testing that patch!",
+            completed: true,
+            hello: "world"
+        };
+
+        request(app)
+            .patch(`/notes/${hexId}`)
+            .send(body)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.note.text).toBe(body.text);
+                expect(res.body.note.completed).toBe(true);
+                expect(res.body.note.completedAt).toBeA("number");
+                expect(res.body.note.hello).toNotExist();
+            })
+            .end(done);
+    });
+    it("Should clear completed at when todo is not completed", (done) => {
+        var hexId = notes[1]._id;
+        var body = {
+            text: "Testing that patch!",
+            completed: false,
+            hello: "world"
+        };
+
+        request(app)
+            .patch(`/notes/${hexId}`)
+            .send(body)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.note.text).toBe(body.text);
+                expect(res.body.note.completed).toBe(false);
+                expect(res.body.note.completedAt).toNotExist();
+                expect(res.body.note.hello).toNotExist();
+            })
             .end(done);
     });
 });
